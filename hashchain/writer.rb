@@ -6,7 +6,26 @@ require 'json'
 FileUtils.mkdir_p('public')
 FileUtils.mkdir_p('secret')
 
-fn_prev = ARGV[1]
+fn_prev = nil
+fn_myid = 'myid'
+if File.exist?(fn_myid)
+  fn_prev = File.open(fn_myid, 'rb') do |fd|
+    fd.read
+  end
+  fn_prev = File.join('public', fn_prev.chomp)
+  # TODO
+  loop do
+    json = File.open(fn_prev, 'rb') do |fd|
+      JSON.parse(fd.read)
+    end
+    fn_next = json[3]
+p fn_next
+    break unless fn_next
+    fn_next = File.join('public', fn_next)
+    break unless File.exist?(fn_next)
+    fn_prev = fn_next
+  end
+end
 secret_cur = nil
 secret_next = nil
 fn_cur = nil
@@ -16,7 +35,7 @@ if fn_prev
     JSON.parse(fd.read)
   end
   fn_prev = File.basename(fn_prev)
-  fn_cur = prev[2]
+  fn_cur = prev[3]
   cur = File.open(File.join('secret', fn_cur), 'rb') do |fd|
     JSON.parse(fd.read)
   end
@@ -25,6 +44,9 @@ else
   secret_cur = rand.to_s
   fn_cur = Digest::MD5.hexdigest(secret_cur)
   puts "Your ID is %s" % fn_cur
+  File.open(fn_myid, 'wb') do |fd|
+    fd.puts(fn_cur)
+  end
 end
 path = File.join('public', fn_cur)
 raise 'already exist' if File.exist?(path)

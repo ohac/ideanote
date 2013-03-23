@@ -17,5 +17,6 @@ end
 
 messages.each do |id, json|
   secret_cur, message, fn_prev, fn_next, proof_of_work = json
-  puts "%s %s %s" % [id[0, 6], fn_next[0, 6], message]
+  fn_prev = '0' * 6 unless fn_prev
+  puts "%s %s %s %s" % [id[0, 6], fn_prev[0, 6], fn_next[0, 6], message]
 end
