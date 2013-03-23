@@ -29,6 +29,7 @@ raise 'already exist' if File.exist?(path)
 secret_next = rand.to_s
 fn_next = Digest::MD5.hexdigest(secret_next)
 message = ARGV[0] || 'no message'
+message = message.to_json
 json = [secret_cur, message, fn_next]
 difficulty = 4
 zeros = '0' * difficulty
