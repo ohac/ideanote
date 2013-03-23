@@ -13,13 +13,11 @@ if File.exist?(fn_myid)
     fd.read
   end
   fn_prev = File.join('public', fn_prev.chomp)
-  # TODO
   loop do
     json = File.open(fn_prev, 'rb') do |fd|
       JSON.parse(fd.read)
     end
     fn_next = json[3]
-p fn_next
     break unless fn_next
     fn_next = File.join('public', fn_next)
     break unless File.exist?(fn_next)

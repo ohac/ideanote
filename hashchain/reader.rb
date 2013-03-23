@@ -2,6 +2,7 @@
 require 'digest/md5'
 require 'json'
 
+accounts = []
 messages = {}
 Dir.glob('public/*') do |fn|
   bn = File.basename(fn)
@@ -13,10 +14,18 @@ Dir.glob('public/*') do |fn|
   raise fn unless Digest::MD5.hexdigest(secret_cur) == bn
   raise fn unless Digest::MD5.hexdigest(json.join('')).index('0' * difficulty) == 0
   messages[bn] = json
+  accounts << bn unless fn_prev
 end
 
-messages.each do |id, json|
-  secret_cur, message, fn_prev, fn_next, proof_of_work = json
-  fn_prev = '0' * 6 unless fn_prev
-  puts "%s %s %s %s" % [id[0, 6], fn_prev[0, 6], fn_next[0, 6], message]
+accounts.each do |bn|
+  puts "Account ID: %s" % bn
+  json = messages[bn]
+  loop do
+    secret_cur, message, fn_prev, fn_next, proof_of_work = json
+    fn_prev = '0' * 6 unless fn_prev
+    puts "%s %s %s %s" % [bn[0, 6], fn_prev[0, 6], fn_next[0, 6], message]
+    bn = fn_next
+    json = messages[bn]
+    break unless json
+  end
 end
