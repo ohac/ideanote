@@ -8,6 +8,7 @@ FileUtils.mkdir_p('secret')
 
 fn_prev = nil
 fn_myid = 'myid'
+difficulty = 4
 if File.exist?(fn_myid)
   fn_prev = File.open(fn_myid, 'rb') do |fd|
     fd.read
@@ -18,8 +19,9 @@ if File.exist?(fn_myid)
       JSON.parse(fd.read)
     end
     fn_next = json[3]
-    break unless fn_next
+    raise unless fn_next
     fn_next = File.join('public', fn_next)
+    difficulty = json[4]
     break unless File.exist?(fn_next)
     fn_prev = fn_next
   end
@@ -52,16 +54,16 @@ secret_next = rand.to_s
 fn_next = Digest::MD5.hexdigest(secret_next)
 message = ARGV[0] || 'no message'
 message = message.to_json
-json = [secret_cur, message, fn_prev, fn_next]
-difficulty = 4
+difficulty_next = 4
+json = [secret_cur, message, fn_prev, fn_next, difficulty_next]
 zeros = '0' * difficulty
 proof_of_work = nil
 loop do
-  json[4] = rand.to_s
+  json[5] = rand.to_s
   str = Digest::MD5.hexdigest(json.join(''))
   break if str.index(zeros) == 0
 end
-proof_of_work = json[4]
+proof_of_work = json[5]
 File.open(path, 'wb') do |fd|
   fd.puts(json.to_json)
 end
